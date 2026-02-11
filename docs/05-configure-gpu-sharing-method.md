@@ -159,12 +159,12 @@ For NVIDIA GPU there are a few methods to optimize GPU utilization:
 ### Takeaways
 
 - This only taints the nodes.
-- Tolerations will be set in the RHOAI accelerator profiles that match the Taint key.
-- This MUST match the Accelerator profile taint key you use (this could be different, i.e. `nvidia-gpu-only` or `nvidia.com/gpu`).
+- Tolerations will be set in the RHOAI hardware profiles that match the Taint key.
+- This MUST match the hardware profile taint key you use (this could be different, i.e. `nvidia-gpu-only` or `nvidia.com/gpu`).
 
 ## Steps
 
-- [ ] Taint the GPU nodes with `nvidia.com/gpu`. This MUST match the Accelerator profile taint key you use (this could be different, i.e. `nvidia-gpu-only`).
+- [ ] Taint the GPU nodes with `nvidia.com/gpu`. This MUST match the hardware profile taint key you use (this could be different, i.e. `nvidia-gpu-only`).
 
       oc adm taint node -l nvidia.com/gpu.machine nvidia.com/gpu=:NoSchedule --overwrite
 
@@ -236,7 +236,7 @@ For NVIDIA GPU there are a few methods to optimize GPU utilization:
 > `machineset.machine.openshift.io/cluster-xxxx-xxxx-worker-us-xxxx-gpu patched`
 
 > [!IMPORTANT]
-> Tolerations will be set in the RHOAI accelerator profiles that match the Taint key.
+> Tolerations will be set in the RHOAI hardware profiles that match the Taint key.
 
 ## Validation
 

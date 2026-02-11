@@ -65,6 +65,56 @@
 > [!NOTE]
 > If taints are present on GPU nodes, ensure that any workloads targeting GPUs include matching tolerations. Tolerations are configured directly in workbench or serving runtime pod specifications.
 
+- [ ] Create a Hardware Profile for NVIDIA GPUs
+
+> [!IMPORTANT]
+> RHOAI 3.x requires [Hardware Profiles](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.2/html/working_with_accelerators/working-with-hardware-profiles_accelerators) to assign accelerator resources to workloads. Hardware profiles are custom resources that define hardware configurations including resource identifiers, limits, tolerations, and node selectors. Without a hardware profile, the RHOAI dashboard cannot assign GPU resources to workbenches or model serving deployments.
+
+1. From the RHOAI dashboard, click **Settings** -> **Environment setup** -> **Hardware profiles**
+1. Click **Create hardware profile**
+1. In the **Name** field, enter `NVIDIA GPU`
+1. Add the following resources by clicking **Add resource** for each:
+
+   **GPU**
+   - **Resource label**: `GPU`
+   - **Resource identifier**: `nvidia.com/gpu`
+   - **Resource type**: Select the appropriate type from the list
+   - **Default**: `1`
+   - **Minimum allowed**: `1`
+   - **Maximum allowed**: `1` (adjust based on your cluster's GPU count per node)
+   - Click **Add**
+
+   **CPU**
+   - **Resource label**: `CPU`
+   - **Resource identifier**: `cpu`
+   - **Resource type**: Select the appropriate type from the list
+   - **Default**: `4`
+   - **Minimum allowed**: `2`
+   - **Maximum allowed**: `8`
+   - Click **Add**
+
+   **Memory**
+   - **Resource label**: `Memory`
+   - **Resource identifier**: `memory`
+   - **Resource type**: Select the appropriate type from the list
+   - **Default**: `24Gi`
+   - **Minimum allowed**: `8Gi`
+   - **Maximum allowed**: `48Gi`
+   - Click **Add**
+
+> [!NOTE]
+> The CPU and memory values above are recommendations for a `g6e.4xlarge` instance (16 vCPUs, 64 GB RAM). Adjust the defaults, minimums, and maximums based on your node size and workload requirements. Leave headroom for the operating system, kubelet, and other cluster services.
+1. Select **Node selectors and tolerations** as the Workload allocation strategy
+1. Click **Add toleration**
+   - **Operator**: `Exists`
+   - **Effect**: `NoSchedule`
+   - **Key**: `nvidia.com/gpu`
+   - Click **Add**
+1. Click **Create hardware profile**
+
+> [!NOTE]
+> The hardware profile should now appear under **Settings** -> **Hardware profiles** in the RHOAI dashboard, and be selectable when creating workbenches or deploying models.
+
 ## 8.2 Increasing your non-GPU compute capacity
 
 ### Objectives

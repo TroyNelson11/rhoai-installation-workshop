@@ -239,6 +239,28 @@
 > `operatorgroup.operators.coreos.com/cluster-observability-operator created`\
 > `subscription.operators.coreos.com/cluster-observability-operator created`
 
+## 6.10 Install the Kernel Module Management Operator
+
+### Objectives
+
+- Creating the Namespace, OperatorGroup, and subscribing to the Kernel Module Management (KMM) Operator
+
+### Rationale
+
+- KMM manages, builds, signs, and deploys out-of-tree kernel modules and device plugins on OpenShift nodes. It is [required by RHOAI](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.2/html/installing_and_uninstalling_openshift_ai_self-managed/enabling-accelerators_install) for enabling accelerators such as NVIDIA GPUs.
+
+## Steps
+
+- [ ] Create the KMM Operator objects
+
+      oc create -f configs/06/kmm-operator.yaml
+
+> Expected output
+>
+> `namespace/openshift-kmm created`\
+> `operatorgroup.operators.coreos.com/kmm-operator created`\
+> `subscription.operators.coreos.com/kernel-module-management created`
+
 ## Validation
 
 - [ ] Verify all dependency operators are installed and available
@@ -253,6 +275,7 @@
 > `openshift-cluster-observability-operator   cluster-observability-operator                                        cluster-observability-operator                 redhat-operators      stable`\
 > `openshift-jobset-operator                  job-set                                                               job-set                                        redhat-operators      tech-preview-v0.1`\
 > `openshift-keda                             openshift-custom-metrics-autoscaler-operator                          openshift-custom-metrics-autoscaler-operator   redhat-operators      stable`\
+> `openshift-kmm                              kernel-module-management                                              kernel-module-management                       redhat-operators      stable`\
 > `openshift-kueue-operator                   kueue-operator                                                        kueue-operator                                 redhat-operators      stable-v1.2`\
 > `openshift-lws-operator                     leader-worker-set                                                     leader-worker-set                              redhat-operators      stable-v1.0`\
 > `openshift-nfd                              nfd                                                                   nfd                                            redhat-operators      stable`\

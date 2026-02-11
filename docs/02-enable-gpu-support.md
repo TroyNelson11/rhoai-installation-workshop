@@ -20,8 +20,8 @@
 
 - Nodes vs. Machines vs. Machinesets
 - GPUs in other cloud providers and bare metal
-- Once completed, RHOAI requires an Accelerator Profile custom resource definition in the redhat-ods-applications.
-- Currently, NVIDIA and Intel Gaudi are the supported [accelerator profiles](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.2/html/working_with_accelerators/overview-of-accelerators_accelerators#overview-of-accelerators_accelerators)
+- Once completed, RHOAI requires a Hardware Profile to be created in the RHOAI dashboard for GPU workloads.
+- Currently, NVIDIA, Intel Gaudi, and AMD are the supported [accelerators](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.2/html/working_with_accelerators/overview-of-accelerators_accelerators#overview-of-accelerators_accelerators)
 
 > You can copy and modify a default compute machine set configuration to create a GPU-enabled machine set and machines for the AWS EC2 cloud provider. [More Info](https://docs.redhat.com/en/documentation/openshift_container_platform/4.16/html/machine_management/managing-compute-machines-with-the-machine-api#nvidia-gpu-aws-adding-a-gpu-node_creating-machineset-aws)
 

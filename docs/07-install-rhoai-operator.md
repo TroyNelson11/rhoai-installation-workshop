@@ -37,6 +37,7 @@ Before you install RHOAI, it is important to understand how its dependencies wil
 | `Cluster Observability Operator`                | unified cluster observability, monitoring, and alerting             |
 | `Red Hat Node Feature Discovery (NFD) Operator` | if additional hardware features are being utilized, like GPU        |
 | `NVIDIA GPU Operator`                           | if NVIDIA GPU accelerators exist                                    |
+| `Kernel Module Management (KMM) Operator`       | manages out-of-tree kernel modules; required for GPU accelerators   |
 
 ## Steps
 
