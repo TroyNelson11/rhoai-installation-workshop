@@ -12,7 +12,7 @@ You will use an example fraud detection model to complete the following tasks:
 - Deploy the model by using OpenShift AI model serving.
 - Refine and train the model by using automated pipelines.
 
-[More Info](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/2.10/html/openshift_ai_tutorial_-_fraud_detection_example)
+[More Info](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.2/html/openshift_ai_tutorial_-_fraud_detection_example)
 
 ## Steps
 
@@ -20,8 +20,7 @@ You will use an example fraud detection model to complete the following tasks:
 - [ ] Clone in repo
 - [ ] Train model
 - [ ] Store model
-- [ ] Deploy the model on a single-model server
-- [ ] Deploy the model on a multi-model server
+- [ ] Deploy the model using KServe single-model serving
 - [ ] Configure Token authorization w/ service account
 - [ ] Test the inference API via Terminal
 - [ ] Build training with Elyra

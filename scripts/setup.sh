@@ -44,7 +44,7 @@ DEFAULT_ADMIN_PASS=scratch/password.txt
 check_cluster_version(){
   OCP_VERSION=$(oc version | sed -n '/Server Version: / s/Server Version: //p')
   AVOID_VERSIONS=()
-  TESTED_VERSIONS=("4.14.37" "4.16.14")
+  TESTED_VERSIONS=("4.19")
 
   echo "Current OCP version: ${OCP_VERSION}"
   echo "Tested OCP version(s): ${TESTED_VERSIONS[*]}"
@@ -207,16 +207,9 @@ workshop_uninstall(){
 
   sleep 8
 
-  oc -n istio-system delete --all servicemeshcontrolplanes.maistra.io
-  oc -n istio-system delete --all servicemeshmemberrolls.maistra.io
-  oc delete --all -A servicemeshmembers.maistra.io
-
-  oc -n knative-serving delete knativeservings.operator.knative.dev knative-serving
   oc delete consoleplugin console-plugin-nvidia-gpu
 
-  oc delete csv -A -l operators.coreos.com/authorino-operator.openshift-operators
   oc delete csv -A -l operators.coreos.com/devworkspace-operator.openshift-operators
-  oc delete csv -A -l operators.coreos.com/servicemeshoperator.openshift-operators
   oc delete csv -A -l operators.coreos.com/web-terminal.openshift-operators
 
   oc delete -n openshift-operators deploy devworkspace-webhook-server

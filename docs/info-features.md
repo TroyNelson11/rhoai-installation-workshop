@@ -13,19 +13,15 @@ Overview of the features in Red Hat OpenShift dependencies.
 | RHOAI Operator          |                | x        | x       | Deploys and maintains the components for RHOAI                        |
 | `dashboard`             |                | x        | x       | Admin and user primary interface                                      |
 | `workbenches`           |                | x        |         | Notebooks images (i.e. Jupyter, code-server, RStudio)                 |
-| `datasciencepipelines`  |                | x        |         | Schedulable multi-step ML workflow execution graph                    |
+| `aipipelines`           |                | x        |         | Schedulable multi-step ML workflow execution graph                    |
 | `distributed-workloads` |                | x        |         | Scalable ML library for distributed training and fine-tuning          |
-|                         | CodeFlare      | x        |         | Secures deployed Ray clusters and grants access to their URLs         |
-|                         | CodeFlare SDK  | x        |         | Python interface for batch resource requesting, job submission, etc.  |
 |                         | Kuberay        | x        |         | Manages remote Ray clusters on K8s for running distributed workloads  |
 |                         | Kueue          | x        |         | Manages quotas, queuing and how distributed workloads consume them    |
-|                         | MCAD           | x        |         | K8s controller to manage batch jobs in a single / multi-cluster env   |
-|                         | Instascale     | x        |         | works with MCAD to launch instances on cloud provider                 |
-| `modelmeshserving`      |                |          | x       | model serving routing layer w/Triton, Seldon, OpenVINO, torchserve... |
-| `kserve`                |                |          | x       | serverless inference w/Triton, HuggingFace, PyTorch, TF, LightGBM...  |
-|                         | `servicemesh`  |          | x       | provides observability, traffic mgmt, and security for inference      |
-|                         | `knative`      |          | x       | provides Autoscaling including Scale to Zero for inference            |
-|                         | `Authorino`    |          | x       | provides token authorization for model inference APIs                 |
+| `kserve`                |                |          | x       | Serverless inference w/Triton, HuggingFace, PyTorch, TF, LightGBM... |
+| `modelregistry`         |                | x        | x       | Central registry for managing ML model metadata and versions          |
+| `ray`                   |                | x        |         | Distributed compute framework for ML training and inference           |
+| `trainingoperator`      |                | x        |         | Manages distributed training jobs (PyTorch, TensorFlow, etc.)         |
+| `trustyai`              |                |          | x       | Model explainability and bias detection                               |
 
 [Supported Configurations](https://access.redhat.com/articles/rhoai-supported-configs)
 

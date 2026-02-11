@@ -8,11 +8,11 @@
 
 ### Objectives
 
-- Installing the prerequisite operators required by Red Hat OpenShift AI 3.x
+- Installing the prerequisite operators required by Red Hat OpenShift AI
 
 ### Rationale
 
-- RHOAI 3.x requires a set of dependency operators to be installed before the RHOAI Operator itself.
+- RHOAI requires a set of dependency operators to be installed before the RHOAI Operator itself.
 
 ### Takeaways
 
