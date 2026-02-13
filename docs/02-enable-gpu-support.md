@@ -195,11 +195,18 @@ Below are some of the [PCI vendor ID assignments](https://pcisig.com/membership/
 > Expected output
 >
 > `NAME                                      READY   STATUS    RESTARTS   AGE`\
-> `nfd-controller-manager-78758c57f7-7xfh4   2/2     Running   0          99s`\
-> `nfd-master-74db665cb6-vht4l               1/1     Running   0          25s`\
-> `nfd-worker-8zkpz                          1/1     Running   0          25s`\
-> `nfd-worker-d7wgh                          1/1     Running   0          25s`\
-> `nfd-worker-l6sqx                          1/1     Running   0          25s`
+> `nfd-controller-manager-7cb9b4d894-bnwwp   1/1     Running   0          96s`\
+> `nfd-gc-558488ddd9-6fr5v                   1/1     Running   0          43s`\
+> `nfd-master-78f5876479-jbk7d               1/1     Running   0          43s`\
+> `nfd-worker-d7wgh                          1/1     Running   0          43s`\
+> `nfd-worker-l6sqx                          1/1     Running   0          43s`
+
+NAME                                      READY   STATUS    RESTARTS   AGE
+nfd-controller-manager-7cb9b4d894-bnwwp   1/1     Running   0          96s
+nfd-gc-558488ddd9-6fr5v                   1/1     Running   0          43s
+nfd-master-78f5876479-jbk7d               1/1     Running   0          43s
+nfd-worker-9h5tp                          1/1     Running   0          43s
+nfd-worker-qkvkx                          1/1     Running   0          43s
 
 - [ ] Verify the GPU device (NVIDIA uses the PCI ID `10de`) is discovered on the GPU node. This means the NFD Operator correctly identified the node from the GPU-enabled MachineSet.
 
@@ -207,9 +214,6 @@ Below are some of the [PCI vendor ID assignments](https://pcisig.com/membership/
 
 > Expected output
 >
-> `Roles:              worker`\
-> `                    feature.node.kubernetes.io/pci-10de.present=true`\
-> `                    feature.node.kubernetes.io/pci-1d0f.present=true`\
 > `                    feature.node.kubernetes.io/pci-1d0f.present=true`\
 > `Roles:              worker`\
 > `                    feature.node.kubernetes.io/pci-10de.present=true`\
@@ -340,11 +344,10 @@ Below are some of the [PCI vendor ID assignments](https://pcisig.com/membership/
 
 - [ ] Add a label to the GPU node Role as `gpu, worker` for readability (cosmetic). You may have to rerun this command for multiple nodes.
 
-      oc label node -l nvidia.com/gpu.machine node-role.kubernetes.io/gpu=''
+      oc label node -l nvidia.com/gpu.machine node-role.kubernetes.io/gpu='' --overwrite
 
 > Expected output
 >
-> `node/ip-10-x-xx-xxx.us-xxxx-x.compute.internal labeled`\
 > `node/ip-10-x-xx-xxx.us-xxxx-x.compute.internal labeled`
 
 - [ ] Get nodes to verify the label
@@ -355,7 +358,6 @@ Below are some of the [PCI vendor ID assignments](https://pcisig.com/membership/
 >
 > `NAME                                        STATUS   ROLES                         AGE   VERSION`\
 > `...`\
-> `ip-10-x-xx-xxx.us-xxxx-x.compute.internal   Ready    gpu,worker                    19h   v1.28.10+a2c84a5`\
 > `ip-10-x-xx-xxx.us-xxxx-x.compute.internal   Ready    gpu,worker                    19h   v1.28.10+a2c84a5`\
 > `...`
 

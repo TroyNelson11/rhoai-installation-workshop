@@ -82,8 +82,7 @@
 
 - [ ] View the NVIDIA DCGM Exporter Dashboard from the OCP UI from Administrator and Developer
 
-> [!TODO]
-> We need to insert a picture here
+![](/assets/nvidia-dcgm-exporter-dashboard.png)
 
 ## Additional Information
 

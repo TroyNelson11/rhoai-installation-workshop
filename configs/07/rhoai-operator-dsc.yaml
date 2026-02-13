@@ -17,7 +17,7 @@ spec:
     kueue:
       defaultClusterQueueName: default
       defaultLocalQueueName: default
-      managementState: Removed
+      managementState: Unmanaged
     llamastackoperator:
       managementState: Removed
     modelregistry:

@@ -51,7 +51,7 @@ For NVIDIA GPU there are a few methods to optimize GPU utilization:
 
 ### Rationale
 
-- The AWS g4dn.4xlarge provides an NVIDIA Tesla that does not support MIG, only time-slicing
+- The AWS g4dn.4xlarge provides an NVIDIA L40S GPU that supports time-slicing
 
 ### Takeaways
 
@@ -84,16 +84,14 @@ For NVIDIA GPU there are a few methods to optimize GPU utilization:
 >
 > `clusterpolicy.nvidia.com/gpu-cluster-policy patched`\
 
-- [ ] Apply the configuration to all the nodes you have with Tesla T GPUs. GFD, labels the nodes with the GPU product, in this example Tesla-T4, so you can use a node selector to label all of the nodes at once.
+- [ ] Apply the configuration to all the nodes you have with Nvidia L40S GPUs. GFD, labels the nodes with the GPU product, in this example a L40S, so you can use a node selector to label all of the nodes at once.
 
-      oc label --overwrite node \
-        --selector=nvidia.com/gpu.product \
+      oc label node -l nvidia.com/gpu.product \
         nvidia.com/device-plugin.config=time-sliced-8
 
 > Expected output
 >
-> `node/ip-10-0-29-207.us-xxxx-x.compute.internal labeled`\
-> `node/ip-10-0-36-189.us-xxxx-x.compute.internal labeled`
+> `node/ip-10-0-29-207.us-xxxx-x.compute.internal labeled`
 
 - [ ] Patch the NVIDIA GPU Operator ClusterPolicy to use the time-slicing configuration by default.
 
@@ -106,11 +104,11 @@ For NVIDIA GPU there are a few methods to optimize GPU utilization:
 > `clusterpolicy.nvidia.com/gpu-cluster-policy patched`
 
 > [!NOTE]
-> The applied configuration creates eight replicas for Tesla T4 GPUs, so the nvidia.com/gpu external resource is set to 8 allocatable. You can apply a cluster-wide default time-slicing configuration. You can also apply node-specific configurations. For example, you can apply a time-slicing configuration to nodes with Tesla-T4 GPUs only and not modify nodes with other GPU models.
+> The applied configuration creates eight replicas for Nvidia L40S GPUs, so the nvidia.com/gpu external resource is set to 8 allocatable. You can apply a cluster-wide default time-slicing configuration. You can also apply node-specific configurations. For example, you can apply a time-slicing configuration to nodes with L40S GPUs only and not modify nodes with other GPU models.
 
 - [ ] Verify replicas for each GPU node
 
-      oc get node --selector=nvidia.com/gpu.product=Tesla-T4-SHARED -o json | jq '.items[0].status.capacity'
+      oc get node --selector=nvidia.com/gpu.product=NVIDIA-L40S-SHARED -o json | jq '.items[0].status.capacity'
 
 > Expected output
 >
@@ -133,7 +131,7 @@ For NVIDIA GPU there are a few methods to optimize GPU utilization:
 > [!NOTE]
 > The `-SHARED` product name suffix ensures that you can specify a node selector to assign pods to nodes with time-sliced GPUs.
 
-      oc get node --selector=nvidia.com/gpu.product=Tesla-T4-SHARED -o json \
+      oc get node --selector=nvidia.com/gpu.product=NVIDIA-L40S-SHARED -o json \
         | jq '.items[0].metadata.labels' | grep nvidia
 
 > Expected output
@@ -141,7 +139,7 @@ For NVIDIA GPU there are a few methods to optimize GPU utilization:
 > `...`\
 > `"nvidia.com/gpu.count": "1",`\
 > `...`\
-> `"nvidia.com/gpu.product": "Tesla-T4-SHARED",`\
+> `"nvidia.com/gpu.product": "NVIDIA-L40S-SHARED",`\
 > `"nvidia.com/gpu.replicas": "8",`\
 > `...`
 
@@ -170,7 +168,6 @@ For NVIDIA GPU there are a few methods to optimize GPU utilization:
 
 > Expected output
 >
-> `node/ip-10-x-xx-xxx.us-xxxx-x.compute.internal modified`\
 > `node/ip-10-x-xx-xxx.us-xxxx-x.compute.internal modified`
 
 - [ ] Patch the `ClusterPolicy` in the NVIDIA GPU Operator to tolerate the taints that we applied.
@@ -187,7 +184,6 @@ For NVIDIA GPU there are a few methods to optimize GPU utilization:
 
 > Expected output
 >
-> `node/ip-10-x-xx-xxx.us-xxxx-x.compute.internal cordoned`\
 > `node/ip-10-x-xx-xxx.us-xxxx-x.compute.internal cordoned`\
 > `...`\
 > `evicting pod nvidia-gpu-operator/console-plugin-nvidia-gpu-754ddf45-8nfx5`\
@@ -218,7 +214,6 @@ For NVIDIA GPU there are a few methods to optimize GPU utilization:
 
 > Expected output
 >
-> `node/ip-10-x-xx-xxx.us-xxxx-x.compute.internal uncordoned`\
 > `node/ip-10-x-xx-xxx.us-xxxx-x.compute.internal uncordoned`\
 
 - [ ] Get the name of the GPU node MachineSet

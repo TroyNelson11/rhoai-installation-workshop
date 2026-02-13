@@ -41,12 +41,6 @@ Before you install RHOAI, it is important to understand how its dependencies wil
 
 ## Steps
 
-- [ ] Check the pre-requisite operators are installed before proceeding.
-
-      oc get subscriptions -A
-
-> Expected output should include the operators installed in [step 6](/docs/06-install-rhoai-dependencies.md).
-
 - [ ] Create the namespace in your RHOCP cluster
 
       oc create -f configs/07/rhoai-operator-ns.yaml
@@ -105,22 +99,14 @@ Before you install RHOAI, it is important to understand how its dependencies wil
 > Expected output
 >
 > `Name:         default-dsci`\
-> `API Version:  dscinitialization.opendatahub.io/v2`\
-> `Kind:         DSCInitialization`\
-> `Spec:`\
-> `  Applications Namespace:  redhat-ods-applications`\
-> `  Monitoring:`\
-> `    Management State:  Managed`\
-> `    Metrics:`\
-> `    Namespace:  redhat-ods-monitoring`\
-> `  Trusted CA Bundle:`\
-> `    Custom CA Bundle:`\
-> `    Management State:  Managed`\
-> `Status:`\
+> `...`\
+> `...`\
+> `...`\
 > `  Phase:  Ready`\
 > `  Release:`\
 > `    Name:     OpenShift AI Self-Managed`\
 > `    Version:  3.2.0`
+> `Events:       <none>`\
 
 ## 7.1 Install RHOAI components
 

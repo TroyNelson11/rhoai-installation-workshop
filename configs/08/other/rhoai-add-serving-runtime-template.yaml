@@ -22,6 +22,7 @@ objects:
       annotations:
         maxLoadingConcurrency: "2"
         openshift.io/display-name: "Nvidia Triton Model Server"
+        opendatahub.io/apiProtocol: REST
     spec:
       supportedModelFormats:
         - name: keras

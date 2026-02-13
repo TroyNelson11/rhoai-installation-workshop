@@ -14,9 +14,9 @@
 - [ ] Git clone this repository
 
 ```sh
-git clone https://github.com/redhat-na-ssa/hobbyist-guide-to-rhoai.git
+git clone https://github.com/redhat-ai-americas/rhoai-installation-workshop.git
 
-cd hobbyist-guide-to-rhoai
+cd rhoai-installation-workshop
 ```
 
 - [ ] Create scratch directory
@@ -39,7 +39,11 @@ oc login <openshift_cluster_url> -u <admin_username> -p <password>
 - [ ] Run prerequisites (from this repository's root directory)
 
 ```sh
-./scripts/setup.sh -s 0
+oc apply -f ./configs/00
+```
+- [ ] If the web-terminal-tooling resource mapping throws an error. Run the apply command again with just the tooling yaml.
+```sh
+oc apply -f ./configs/00/web-terminal-tooling.yaml
 ```
 
 > [!NOTE]

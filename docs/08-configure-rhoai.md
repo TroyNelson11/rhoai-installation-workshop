@@ -43,7 +43,7 @@
 
 > Expected output
 >
-> `ip-10-x-xx-xxx.us-xxxx-x.compute.internal	1`\
+> `ip-10-x-xx-xxx.us-xxxx-x.compute.internal	8`\
 
 - [ ] Verify GPU node labels are present
 
@@ -51,7 +51,7 @@
 
 > Expected output
 >
-> `NVIDIA-L40S`\
+> `NVIDIA-L40S-SHARED`\
 
 
 - [ ] If taints were configured in step 5, verify they are present on GPU nodes
@@ -73,39 +73,35 @@
 1. From the RHOAI dashboard, click **Settings** -> **Environment setup** -> **Hardware profiles**
 1. Click **Create hardware profile**
 1. In the **Name** field, enter `NVIDIA GPU`
-1. Add the following resources by clicking **Add resource** for each:
+1. Add the following resource by clicking **Add resource**:
 
    **GPU**
    - **Resource label**: `GPU`
    - **Resource identifier**: `nvidia.com/gpu`
-   - **Resource type**: Select the appropriate type from the list
+   - **Resource type**: 'Accelerator'
    - **Default**: `1`
    - **Minimum allowed**: `1`
    - **Maximum allowed**: `1` (adjust based on your cluster's GPU count per node)
    - Click **Add**
 
+1. Edit the following resources by clicking the **Pencil Icon** on each:
+
    **CPU**
-   - **Resource label**: `CPU`
-   - **Resource identifier**: `cpu`
-   - **Resource type**: Select the appropriate type from the list
    - **Default**: `4`
    - **Minimum allowed**: `2`
    - **Maximum allowed**: `8`
-   - Click **Add**
+   - Click **Update**
 
    **Memory**
-   - **Resource label**: `Memory`
-   - **Resource identifier**: `memory`
-   - **Resource type**: Select the appropriate type from the list
    - **Default**: `24Gi`
    - **Minimum allowed**: `8Gi`
    - **Maximum allowed**: `48Gi`
-   - Click **Add**
+   - Click **Update**
 
 > [!NOTE]
 > The CPU and memory values above are recommendations for a `g6e.4xlarge` instance (16 vCPUs, 64 GB RAM). Adjust the defaults, minimums, and maximums based on your node size and workload requirements. Leave headroom for the operating system, kubelet, and other cluster services.
-1. Select **Node selectors and tolerations** as the Workload allocation strategy
-1. Click **Add toleration**
+1. Scroll down to **node selectors and tolerations**, the Workload allocation strategy
+1. Click **⊕ Add toleration**
    - **Operator**: `Exists`
    - **Effect**: `NoSchedule`
    - **Key**: `nvidia.com/gpu`
@@ -173,29 +169,11 @@
 
 ## Steps
 
-**Option 1 (manual)**:
-
-- From RHOAI, Settings > Serving runtimes > Click Add Serving Runtime.
-- Select `Single-model serving platform`
-- Select `Start from scratch`
-- Review, Copy and Paste in the content from `configs/08/other/rhoai-add-serving-runtime.yaml`
-- Add and confirm the runtime can be selected in a Data Science Project
-
-**Option 2**:
-
-    oc apply -f configs/08/rhoai-add-serving-runtime-template.yaml -n redhat-ods-applications
-
-> Expected output
->
-> `template.template.openshift.io/triton created`
-
-## Validation
-
-- Open the OpenShift AI dashboard
-- Navigate to a Data Science Project (such as `sandbox`)
-- Navigate to the `Models` tab of the project
-- Deploy a model using the `Single-model serving platform`
-- Grab the pulldown for `Serving runtime` and confirm that `Nvidia Triton Model Server` is visible from the options
+- From RHOAI, Settings > Model resources and operations > Serving runtimes > Click **Add serving runtime**.
+- Select the API protocol `REST`
+- Select both model types `Predicitive Model & Generatative AI model` (you can change this in the future)
+- Copy and Paste in the content from `configs/08/rhoai-add-serving-runtime.yaml`
+- Click **Create**
 
 ## 8.4 Configuring Data Science Pipelines
 
@@ -223,7 +201,10 @@
 
 > Expected output
 >
-> `Now using project "database" on server "https://api.cluster-5mgxv.5mgxv.sandbox3005.opentlc.com:6443".`
+> `...`
+> `...`
+> `Now using project "database" on server "https://api.cluster-xxxxx.xxxxx.sandbox3005.opentlc.com:6443".`
+> `...`
 
 - [ ] Create the database instance
 
@@ -347,6 +328,8 @@
 > `to build a new example application in Ruby. Or use kubectl to deploy a simple Kubernetes application:`
 >
 > `    kubectl create deployment hello-node --image=registry.k8s.io/e2e-test-images/agnhost:2.43 -- /agnhost serve-hostname`
+>
+> `namespace/pipeline-test labeled`
 
 - [ ] Create required secrets for pipeline server
 
@@ -374,9 +357,9 @@
 
 ## Validation
 
-Navigate to RHOAI dashboard -> Data Science Pipelines -> Project `pipeline-test`
+Navigate to RHOAI dashboard -> Develop & Train -> Pipelines -> Project `pipeline-test`
 
-You should see the `iris-training` pipeline and be able to execute a pipeline run. Use the three dots menu on the right side of the pipeline to instantiate the run.
+You should see the `iris-training` pipeline and be able to execute a pipeline run. Use the three dots menu on the right side of the pipeline to instantiate the run. You could also navigate through the `pipeline-test` project directly.
 
 ## Validation
 

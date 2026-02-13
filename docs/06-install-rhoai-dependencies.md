@@ -124,7 +124,7 @@
 > `operatorgroup.operators.coreos.com/connectivity-link-operator created`\
 > `subscription.operators.coreos.com/kuadrant-operator created`
 
-## 6.5 Install the Kueue Operator
+## 6.5 Install the Red Hat build of Kueue Operator
 
 ### Objectives
 
