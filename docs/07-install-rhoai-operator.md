@@ -1,14 +1,14 @@
 # 7. Install RHOAI operator
 
 <p align="center">
-<a href="/docs/06-install-kserve-dependencies.md">Prev</a>
+<a href="/docs/06-install-rhoai-dependencies.md">Prev</a>
 &nbsp;&nbsp;&nbsp;
 <a href="/docs/08-configure-rhoai.md">Next</a>
 </p>
 
 ### Objectives
 
-- Creating the Namespace, OperatorGroup and subscribing Serverless Operator
+- Creating the Namespace, OperatorGroup and subscribing to the Red Hat OpenShift AI Operator
 
 ### Rationale
 
@@ -16,39 +16,30 @@
 
 ### Takeaways
 
-- Stable vs fast product features.
-- Fast can lead to an inconsistent experience as it is only supported for 1 month and it updated every month (source)
+- RHOAI uses the `fast-3.x` channel
+- Requires OpenShift Container Platform 4.19 or later
 - Review the default-dsci
 - Review the created projects
 
-Before you install RHOAI, it is important to understand how it's dependencies will be managed as it be automated or not. Below are required and **use-case dependent operators**:
+Before you install RHOAI, it is important to understand how its dependencies will be managed. The dependency operators should have been installed in the [previous step](/docs/06-install-rhoai-dependencies.md). Below are the required and **use-case dependent operators**:
 
 | Operator                                        | Description                                                         |
 | ----------------------------------------------- | ------------------------------------------------------------------- |
-| `Red Hat OpenShift Serverless Operator`         | if RHOAI KServe is planned for serving, this is required            |
-| `Red Hat OpenShift Service Mesh Operator`       | if RHOAI KServe is planned for serving, this is required            |
-| `Red Hat Authorino Operator`                    | if you want to authenticate KServe model API endpoints with a route |
+| `JobSet Operator`                               | manages large-scale coordinated AI training workloads               |
+| `Custom Metrics Autoscaler Operator`            | event-driven autoscaling for AI/ML inference workloads              |
+| `cert-manager Operator`                         | required by Leader Worker Set Operator                              |
+| `Leader Worker Set Operator`                    | multi-host inference for sharded LLMs across multiple nodes         |
+| `Red Hat Connectivity Link Operator`            | API gateway and connectivity (Kuadrant/Authorino)                   |
+| `Kueue Operator`                                | job queueing and resource quota management for AI/ML workloads      |
+| `SR-IOV Network Operator`                       | high-performance networking for GPU-to-GPU communication            |
+| `OpenTelemetry Operator`                        | distributed tracing data collection for observability               |
+| `Tempo Operator`                                | distributed tracing backend for storing and querying trace data     |
+| `Cluster Observability Operator`                | unified cluster observability, monitoring, and alerting             |
 | `Red Hat Node Feature Discovery (NFD) Operator` | if additional hardware features are being utilized, like GPU        |
 | `NVIDIA GPU Operator`                           | if NVIDIA GPU accelerators exist                                    |
-| `NVIDIA Network Operator`                       | if NVIDIA Infiniband accelerators exist                             |
-| `Kernel Module Management (KMM) Operator`       | if Intel Gaudi/AMD accelerators exist                               |
-| `HabanaAI Operator`                             | if Intel Gaudi accelerators exist                                   |
-| `AMD GPU Operator`                              | if AMD accelerators exist                                           |
+| `Kernel Module Management (KMM) Operator`       | manages out-of-tree kernel modules; required for GPU accelerators   |
 
 ## Steps
-
-- [ ] Check the pre-requisite operators in order to fully deploy RHOAI components.
-
-      oc get subscriptions -A
-
-> Expected output
->
-> `NAMESPACE              NAME                                                                PACKAGE                 SOURCE             CHANNEL`\
-> `openshift-operators    authorino-operator                                                  authorino-operator      redhat-operators   tech-preview-v1`\
-> `openshift-operators    devworkspace-operator-fast-redhat-operators-openshift-marketplace   devworkspace-operator   redhat-operators   fast`\
-> `openshift-operators    servicemeshoperator                                                 servicemeshoperator     redhat-operators   stable`\
-> `openshift-operators    web-terminal                                                        web-terminal            redhat-operators   fast`\
-> `openshift-serverless   serverless-operator                                                 serverless-operator     redhat-operators   stable`
 
 - [ ] Create the namespace in your RHOCP cluster
 
@@ -67,7 +58,7 @@ Before you install RHOAI, it is important to understand how it's dependencies wi
 > `operatorgroup.operators.coreos.com/rhods-operator created`
 
 > [!NOTE]
-> We are using `stable` channel as this gives customers access to the stable product features. `fast` can lead to an inconsistent experience as it is only supported for 1 month and it is updated every month. More information about supported versions, channels, and their characteristics is available [here](https://access.redhat.com/articles/rhoai-supported-configs).
+> We are using the `fast-3.x` channel. More information about supported versions, channels, and their characteristics is available [here](https://access.redhat.com/articles/rhoai-supported-configs).
 
 - [ ] Create the Subscription object
 
@@ -101,8 +92,6 @@ Before you install RHOAI, it is important to understand how it's dependencies wi
 > [!IMPORTANT]
 > Do not install independent software vendor (ISV) applications in namespaces associated with OpenShift AI.
 
-- The RHOAI Operator is installed with a `default-dsci` object with the following. Notice how the `serviceMesh` is `Managed`. By default, RHOAI is managing `ServiceMesh`.
-
 - [ ] Verify `default-dsci` yaml file
 
       oc describe DSCInitialization -n redhat-ods-operator
@@ -110,25 +99,14 @@ Before you install RHOAI, it is important to understand how it's dependencies wi
 > Expected output
 >
 > `Name:         default-dsci`\
-> `API Version:  dscinitialization.opendatahub.io/v1`\
-> `Kind:         DSCInitialization`\
-> `Spec:`\
-> `  Applications Namespace:  redhat-ods-applications`\
-> `  Monitoring:`\
-> `    Management State:  Managed`\
-> `    Namespace:         redhat-ods-monitoring`\
-> `  Service Mesh:`\
-> `    Auth:`\
-> `      Audiences:`\
-> `        https://kubernetes.default.svc`\
-> `    Control Plane:`\
-> `      Metrics Collection:  Istio`\
-> `      Name:                data-science-smcp`\
-> `      Namespace:           istio-system`\
-> `    Management State:      Managed`\
-> `  Trusted CA Bundle:`\
-> `  Custom CA Bundle:`\
-> `    Management State:  Managed`
+> `...`\
+> `...`\
+> `...`\
+> `  Phase:  Ready`\
+> `  Release:`\
+> `    Name:     OpenShift AI Self-Managed`\
+> `    Version:  3.2.0`
+> `Events:       <none>`\
 
 ## 7.1 Install RHOAI components
 
@@ -143,7 +121,8 @@ Before you install RHOAI, it is important to understand how it's dependencies wi
 ### Takeaways
 
 - The Channel, DSC and DSCI are critical
-- When you manually installed KServe, you set the value of the managementState to Unmanaged within the Kserve component in the DataScienceCluster and MUST update the DSCInitialization object.
+- The DSC uses the `datasciencecluster.opendatahub.io/v2` API version
+- The DSC defines which components are `Managed`, `Removed`, or `Unmanaged`
 
 #### RHOAI Component States
 
@@ -151,16 +130,15 @@ There are 3x RHOAI Operator dependency states to be set: `Managed`, `Removed`, a
 
 | State       | Description                                                                                                                                                                                                                                                                                                                            |
 | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Managed`   | The RHOAI Operator manages the dependency (i.e. `Service Mesh`, `Serverless`, etc.). RHOAI manages the operands, not the operators. This is where `FeatureTrackers` come into play.                                                                                                                                                    |
+| `Managed`   | The RHOAI Operator manages the dependency. RHOAI manages the operands, not the operators.                                                                                                                                                                                                                                              |
 | `Removed`   | The RHOAI Operator removes the dependency. Changing from `Managed` to `Removed` does remove the dependency                                                                                                                                                                                                                             |
-| `Unmanaged` | The RHAOI Operator does not manage the dependency allowing for an administrator to manage it instead. Changing from `Managed` to `Unmanaged` does not remove the dependency. For example, this is important when the customer has an existing Service Mesh. It won't create it when it doesn't exist, but you can make manual changes. |
+| `Unmanaged` | The RHOAI Operator does not manage the dependency allowing for an administrator to manage it instead. Changing from `Managed` to `Unmanaged` does not remove the dependency. For example, this is important when the customer has an existing configuration. It won't create it when it doesn't exist, but you can make manual changes. |
 
 ## Steps
 
 > [!NOTE]
 > In order to use RHOAI functionality, you must create a DataScienceCluster instance.
-> When you manually installed KServe, you set the value of the managementState to `Unmanaged` within the Kserve component in the DataScienceCluster and MUST update the DSCInitialization object.
-> For `Unmanaged` dependencies, see the Install and managing RHOAI components on the \_APPENDIX.md.
+> The provided DSC sets all components to `Removed` by default. Update the `managementState` to `Managed` for the components you want to enable.
 
 - [ ] Create the DSC object
 
@@ -183,26 +161,15 @@ There are 3x RHOAI Operator dependency states to be set: `Managed`, `Removed`, a
 
 - [ ] Verify DSC and related object creation
 
-      oc get DataScienceCluster,DSCInitialization,FeatureTracker -n redhat-ods-operator
+      oc get DataScienceCluster,DSCInitialization -n redhat-ods-operator
 
 > Expected output
 >
-> `NAME                                                               AGE`\
+> `NAME                                                               R`\
 > `datasciencecluster.datasciencecluster.opendatahub.io/default-dsc   4m31s`
 >
 > `NAME                                                              AGE     PHASE   CREATED AT`\
-> `dscinitialization.dscinitialization.opendatahub.io/default-dsci   7m43s   Ready   2024-10-11T17:49:37Z`
->
-> `NAME                                                                                                            AGE`\
-> `featuretracker.features.opendatahub.io/redhat-ods-applications-enable-proxy-injection-in-authorino-deployment   7m13s`\
-> `featuretracker.features.opendatahub.io/redhat-ods-applications-kserve-external-authz                            85s`\
-> `featuretracker.features.opendatahub.io/redhat-ods-applications-mesh-control-plane-creation                      7m39s`\
-> `featuretracker.features.opendatahub.io/redhat-ods-applications-mesh-control-plane-external-authz                7m17s`\
-> `featuretracker.features.opendatahub.io/redhat-ods-applications-mesh-metrics-collection                          7m19s`\
-> `featuretracker.features.opendatahub.io/redhat-ods-applications-mesh-shared-configmap                            7m17s`\
-> `featuretracker.features.opendatahub.io/redhat-ods-applications-serverless-net-istio-secret-filtering            92s`\
-> `featuretracker.features.opendatahub.io/redhat-ods-applications-serverless-serving-deployment                    112s`\
-> `featuretracker.features.opendatahub.io/redhat-ods-applications-serverless-serving-gateways                      88s`
+> `dscinitialization.dscinitialization.opendatahub.io/default-dsci   7m43s   Ready   2026-02-11T17:49:37Z`
 
 ## Validation
 
@@ -217,7 +184,7 @@ There are 3x RHOAI Operator dependency states to be set: `Managed`, `Removed`, a
 ```
 
 <p align="center">
-<a href="/docs/06-install-kserve-dependencies.md">Prev</a>
+<a href="/docs/06-install-rhoai-dependencies.md">Prev</a>
 &nbsp;&nbsp;&nbsp;
 <a href="/docs/08-configure-rhoai.md">Next</a>
 </p>

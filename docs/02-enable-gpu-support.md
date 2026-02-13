@@ -20,8 +20,8 @@
 
 - Nodes vs. Machines vs. Machinesets
 - GPUs in other cloud providers and bare metal
-- Once completed, RHOAI requires an Accelerator Profile custom resource definition in the redhat-ods-applications.
-- Currently, NVIDIA and Intel Gaudi are the supported [accelerator profiles](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/2.13/html/working_with_accelerators/overview-of-accelerators_accelerators#overview-of-accelerators_accelerators)
+- Once completed, RHOAI requires a Hardware Profile to be created in the RHOAI dashboard for GPU workloads.
+- Currently, NVIDIA, Intel Gaudi, and AMD are the supported [accelerators](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.2/html/working_with_accelerators/overview-of-accelerators_accelerators#overview-of-accelerators_accelerators)
 
 > You can copy and modify a default compute machine set configuration to create a GPU-enabled machine set and machines for the AWS EC2 cloud provider. [More Info](https://docs.redhat.com/en/documentation/openshift_container_platform/4.16/html/machine_management/managing-compute-machines-with-the-machine-api#nvidia-gpu-aws-adding-a-gpu-node_creating-machineset-aws)
 
@@ -61,7 +61,7 @@
   - [ ] ~Line 18 `.spec.replicas` from `0` to `1`
   - [ ] ~Line 22`.spec.selector.matchLabels["machine.openshift.io/cluster-api-machineset"]` to match the new `.metadata.name`.
   - [ ] ~Line 29 `.spec.template.metadata.labels["machine.openshift.io/cluster-api-machineset"]` to match the new `.metadata.name`.
-  - [ ] ~Line 51 `.spec.template.spec.providerSpec.value.instanceType` to `g4dn.4xlarge`.
+  - [ ] ~Line 51 `.spec.template.spec.providerSpec.value.instanceType` to `g6e.4xlarge`.
 
 > [!TIP]
 > You can use `sed` or `yq` commands. However, sed is more limited and error-prone for complex YAML manipulations. If you have yq installed (a powerful YAML processor), it's much easier to handle such updates.
@@ -86,7 +86,7 @@
 
 > Expected output
 >
-> `cluster-xxxxx-xxxxx-worker-us-xxxx-xc-gpu   2         2         2       2           6m37s`
+> `cluster-xxxxx-xxxxx-worker-us-xxxx-xc-gpu   1         1                          10s`
 
 - [ ] View the Machine object that the machine set created
 
@@ -94,8 +94,7 @@
 
 > Expected output
 >
-> `cluster-xxxxx-xxxxx-worker-us-xxxx-xc-gpu-29whc   Running   g4dn.4xlarge   us-xxxx-x   us-xxxx-xc   7m59s`\
-> `cluster-xxxxx-xxxxx-worker-us-xxxx-xc-gpu-nr59d   Running   g4dn.4xlarge   us-xxxx-x   us-xxxx-xc   7m59s`
+> `cluster-xxxxx-xxxxx-worker-us-xxxx-xc-gpu-29whc   Running   g6e.4xlarge   us-xxxx-x   us-xxxx-xc   20s`
 
 > [!NOTE]
 > Exit out (CTRL+C) of the above command when you see the expected output
@@ -127,8 +126,7 @@
 
 > Expected output
 >
-> `openshift-nfd-operator                             Community Operators   8h`\
-> `nfd                                                Red Hat Operators     8h`
+> `nfd                                              Red Hat Operators     4h2m`
 
 - [ ] Apply the Namespace object
 
@@ -162,7 +160,7 @@
 >
 > `NAME                                      READY   STATUS    RESTARTS   AGE`\
 > `...`\
-> `nfd-controller-manager-78758c57f7-7xfh4   2/2     Running   0          48s`
+> `nfd-controller-manager-78758c57f7-7xfh4   1/1     Running   0          13s`
 
 > [!NOTE]
 > Exit out (CTRL+C) of the above command when you see the expected output
@@ -197,11 +195,18 @@ Below are some of the [PCI vendor ID assignments](https://pcisig.com/membership/
 > Expected output
 >
 > `NAME                                      READY   STATUS    RESTARTS   AGE`\
-> `nfd-controller-manager-78758c57f7-7xfh4   2/2     Running   0          99s`\
-> `nfd-master-74db665cb6-vht4l               1/1     Running   0          25s`\
-> `nfd-worker-8zkpz                          1/1     Running   0          25s`\
-> `nfd-worker-d7wgh                          1/1     Running   0          25s`\
-> `nfd-worker-l6sqx                          1/1     Running   0          25s`
+> `nfd-controller-manager-7cb9b4d894-bnwwp   1/1     Running   0          96s`\
+> `nfd-gc-558488ddd9-6fr5v                   1/1     Running   0          43s`\
+> `nfd-master-78f5876479-jbk7d               1/1     Running   0          43s`\
+> `nfd-worker-d7wgh                          1/1     Running   0          43s`\
+> `nfd-worker-l6sqx                          1/1     Running   0          43s`
+
+NAME                                      READY   STATUS    RESTARTS   AGE
+nfd-controller-manager-7cb9b4d894-bnwwp   1/1     Running   0          96s
+nfd-gc-558488ddd9-6fr5v                   1/1     Running   0          43s
+nfd-master-78f5876479-jbk7d               1/1     Running   0          43s
+nfd-worker-9h5tp                          1/1     Running   0          43s
+nfd-worker-qkvkx                          1/1     Running   0          43s
 
 - [ ] Verify the GPU device (NVIDIA uses the PCI ID `10de`) is discovered on the GPU node. This means the NFD Operator correctly identified the node from the GPU-enabled MachineSet.
 
@@ -209,9 +214,6 @@ Below are some of the [PCI vendor ID assignments](https://pcisig.com/membership/
 
 > Expected output
 >
-> `Roles:              worker`\
-> `                    feature.node.kubernetes.io/pci-10de.present=true`\
-> `                    feature.node.kubernetes.io/pci-1d0f.present=true`\
 > `                    feature.node.kubernetes.io/pci-1d0f.present=true`\
 > `Roles:              worker`\
 > `                    feature.node.kubernetes.io/pci-10de.present=true`\
@@ -287,7 +289,7 @@ Below are some of the [PCI vendor ID assignments](https://pcisig.com/membership/
 >
 > `NAME            CSV                              APPROVAL    APPROVED`\
 > `...`\
-> `install-295r6   gpu-operator-certified.v24.6.1   Automatic   true`
+> `install-295r6   gpu-operator-certified.v25.10.1   Automatic   true`
 
 > [!NOTE]
 > Exit out (CTRL+C) of the above command when you see the expected output
@@ -312,13 +314,12 @@ Below are some of the [PCI vendor ID assignments](https://pcisig.com/membership/
       oc get pod -l openshift.driver-toolkit -n nvidia-gpu-operator -w
 
 > [!IMPORTANT]
-> The Nvidia drivers are not loaded and ready for consumption until this command shows both pods at `2/2` ready. This means that the label selector used in the next step for labelling the nodes won't work either.
+> The Nvidia drivers are not loaded and ready for consumption until this command shows the pod at `2/2` ready. This means that the label selector used in the next step for labelling the nodes won't work either.
 
 > Expected output
 >
 > `NAME                                                  READY   STATUS    RESTARTS   AGE`\
-> `nvidia-driver-daemonset-416.94.202409191851-0-8mzb2   2/2     Running   0          5m34s`\
-> `nvidia-driver-daemonset-416.94.202409191851-0-q5r7d   2/2     Running   0          5m34s`
+> `nvidia-driver-daemonset-416.94.202409191851-0-8mzb2   2/2     Running   0          5m34s`
 
 > [!NOTE]
 > With the daemonset deployed, NVIDIA GPUs have the `nvidia-device-plugin` and can be requested by a container using the `nvidia.com/gpu` resource type. The [NVIDIA device plugin](https://github.com/NVIDIA/k8s-device-plugin?tab=readme-ov-file#shared-access-to-gpus) has a number of options, like MIG Strategy, that can be configured for it. We will do this in a later step.
@@ -343,11 +344,10 @@ Below are some of the [PCI vendor ID assignments](https://pcisig.com/membership/
 
 - [ ] Add a label to the GPU node Role as `gpu, worker` for readability (cosmetic). You may have to rerun this command for multiple nodes.
 
-      oc label node -l nvidia.com/gpu.machine node-role.kubernetes.io/gpu=''
+      oc label node -l nvidia.com/gpu.machine node-role.kubernetes.io/gpu='' --overwrite
 
 > Expected output
 >
-> `node/ip-10-x-xx-xxx.us-xxxx-x.compute.internal labeled`\
 > `node/ip-10-x-xx-xxx.us-xxxx-x.compute.internal labeled`
 
 - [ ] Get nodes to verify the label
@@ -358,7 +358,6 @@ Below are some of the [PCI vendor ID assignments](https://pcisig.com/membership/
 >
 > `NAME                                        STATUS   ROLES                         AGE   VERSION`\
 > `...`\
-> `ip-10-x-xx-xxx.us-xxxx-x.compute.internal   Ready    gpu,worker                    19h   v1.28.10+a2c84a5`\
 > `ip-10-x-xx-xxx.us-xxxx-x.compute.internal   Ready    gpu,worker                    19h   v1.28.10+a2c84a5`\
 > `...`
 

@@ -11,13 +11,13 @@
 ### Rationale
 
 - Distributed workloads enable data scientists to use multiple cluster nodes in parallel for faster and more efficient data processing and model training.
-- The CodeFlare framework simplifies task orchestration and monitoring, and offers seamless integration for automated resource scaling and optimal node utilization with advanced GPU support.
-  [More Info](https://access.redhat.com/documentation/en-us/red_hat_openshift_ai_self-managed/2.10/html/working_with_distributed_workloads/running-distributed-workloads_distributed-workloads)
+- The distributed workload stack uses Kueue for job scheduling and resource management, with Ray for distributed compute orchestration.
+  [More Info](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.2/html/managing_openshift_ai/managing-distributed-workloads)
 
 ### Takeaways
 
 - Distributed Workloads functionalities of RHOAI enable use of many resources and large amounts of chunked work
-- Multi-tenancy and smart resource utilization is built into the multi-stage scheduler design
+- Multi-tenancy and smart resource utilization is built into the multi-stage scheduler design (Kueue + Ray two-stage scheduling)
 - Distributed workloads can be interacted with by submitting jobs, including through the Kubernetes API, or by interactively working within Python code
 - S3-compatible object storage facilitates synchronizing work across multiple workers and should be expected to be available for these use cases
 
@@ -43,7 +43,7 @@
 - [ ] Navigate to the `Workbenches` tab at the top of the project interface
 - [ ] Create a workbench using the blue `Create workbench` button in the top right with the following settings
   - [ ] You may type any name you like
-  - [ ] Select the `Standard Data Science` Notebook image, and ensure that the `Version selection` field (which auto-populates after selecting the image) says `2024.1`
+  - [ ] Select the `Standard Data Science` Notebook image, and ensure that the `Version selection` field (which auto-populates after selecting the image) is the latest available version
   - [ ] Leave `Container size` set to `Small` as we will be using minimal resources for Jupyter and letting Ray consume the bulk of our resources
   - [ ] Leave `Accelerator` unset, reading `Select...` as we will be using Ray to manage our workload accelerators
   - [ ] Leave the `Cluster storage` section with its defaults of `20 Gi` of storage, named similarly to your workbench instance
@@ -75,14 +75,14 @@
 ## 10.2 Running the distributed workloads demos
 
 > [!IMPORTANT]
-> In the cluster_job_client workbench, if your RayCluster does not come ready and hangs on the cell that says `cluster.wait_ready()` on the last line, you can check the pods in your Sandbox namespace to see if they are stuck in a `Pending` state due to an untolerated taint. If it does, you'll need to restart the Kueue controller in the `redhat-ods-applications` namespace by deleting the pod. For more information about this behavior, see [this docs link](https://kueue.sigs.k8s.io/docs/tasks/run/rayclusters/#before-you-begin).
+> In the cluster_job_client workbench, if your RayCluster does not come ready and hangs on the cell that says `cluster.wait_ready()` on the last line, you can check the pods in your Sandbox namespace to see if they are stuck in a `Pending` state due to an untolerated taint. If it does, you'll need to restart the Kueue controller in the `openshift-kueue-operator` namespace. For more information about this behavior, see [this docs link](https://kueue.sigs.k8s.io/docs/tasks/run/rayclusters/#before-you-begin).
 
 - [ ] If you're running 1_cluster_job_client and you're in the above situation, run the following to confirm that your RayCluster isn't hung up
 
       oc get pod -n sandbox -l ray.io/is-ray-node -ojsonpath='{range .items[0].status.conditions[*]}{.message}{"\n"}{end}' 2>/dev/null | grep 'untolerated'
 
   - [ ] If, and only if, the above returns a line showing that the GPU taint was untolerated, should you bounce the Kueue pod using the following command (no copy block to prevent mistakes!)
-    - `oc delete pod -n redhat-ods-applications -l app.opendatahub.io/kueue`
+    - `oc delete pod -n openshift-kueue-operator -l control-plane=controller-manager`
 
 ## Steps
 

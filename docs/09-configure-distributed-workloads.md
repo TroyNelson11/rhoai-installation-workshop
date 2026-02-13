@@ -8,7 +8,8 @@
 
 ### Objectives
 
-- Discussing the relation between Ray, CodeFlare, MCAD, InstaScale, and Kueue (ResourcesFlavor, ClusterQueue and LocalQueue)
+- Configuring Kueue (ResourceFlavor, ClusterQueue, and LocalQueue) for distributed workload scheduling
+- Understanding the relationship between Ray, Kueue, and the Training Operator
 
 ### Rationale
 
@@ -22,39 +23,44 @@
 - [Features](https://kueue.sigs.k8s.io/docs/overview/#features-overview) of Kueue
 - Kueue flow [diagram](https://kueue.sigs.k8s.io/docs/overview/#high-level-kueue-operation)
 - Kueue [Concepts](https://kueue.sigs.k8s.io/docs/concepts/)
-- A way we handle "jobs" in RHOAI in concert with Pipelines "experiments"
-- Add CodeFlare and Ray
+- The distributed workload stack is **Kueue + Ray + Training Operator**
+- Kueue was installed as a standalone operator in [step 6](/docs/06-install-rhoai-dependencies.md)
 
 > You can run distributed workloads from data science pipelines, from Jupyter notebooks, or from Microsoft Visual Studio Code files.
-> [More Info](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/2.10/html/working_with_distributed_workloads/Configure-distributed-workloads_distributed-workloads)
+> [More Info](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.2/html/managing_openshift_ai/managing-workloads-with-kueue)
 
 Components required for Distributed Workloads
 
 - Dashboard
 - Workbenches
-- Datasciencepipelines
-- Codeflare operator
-- Codeflare
-- Kueue
+- Data Science Pipelines
+- Kueue (standalone operator, installed in step 6)
 - Ray
 
 ## Steps
 
-- [ ] Verify the necessary pods are running - When the status of the codeflare-operator-manager-[pod-id], kuberay-operator-[pod-id], and kueue-controller-manager-[pod-id] pods is Running, the pods are ready to use.
+- [ ] Verify the Kueue operator is running (installed as a standalone operator in step 6)
 
-      oc get pods -n redhat-ods-applications | grep -E 'codeflare|kuberay|kueue'
+      oc get pods -n openshift-kueue-operator
 
 > Expected output
 >
-> `codeflare-operator-manager-6bbff698d-74fpz                        1/1     Running   7 (107m ago)   21h`\
-> `kuberay-operator-bf97858f4-zg45s                                  1/1     Running   8 (10m ago)    21h`\
-> `kueue-controller-manager-77c758b595-hgrz7                         1/1     Running   8 (10m ago)    21h`
+> `NAME                                        READY   STATUS    RESTARTS   AGE`\
+> `kueue-controller-manager-xxxxxxxxx-xxxxx    1/1     Running   0          1h`
 
-## 9.1 Create an empty Kueue resource flavor
+- [ ] Verify the Ray operator is running
 
-Resources in a cluster are typically not homogeneous. A ResourceFlavor is an object that describes these resource variations (i.e. Nvidia A100 versus T4 GPUs) and allows you to associate them with cluster nodes through labels, taints and tolerations.
+      oc get pods -n redhat-ods-applications | grep kuberay
 
-A cluster administrator can create an empty ResourceFlavor object named `default-flavor`, without any labels or taints
+> Expected output
+>
+> `kuberay-operator-xxxxxxxxx-xxxxx    1/1     Running   0          1h`
+
+## 9.1 Create a Kueue resource flavor
+
+Resources in a cluster are typically not homogeneous. A ResourceFlavor is an object that describes these resource variations (i.e. Nvidia A100 versus L40S GPUs) and allows you to associate them with cluster nodes through labels, taints and tolerations.
+
+A cluster administrator can create a ResourceFlavor object named `default-flavor` with a toleration for GPU-tainted nodes.
 
 In RHOAI, Red Hat supports only a single cluster queue per cluster (that is, homogenous clusters), and only empty resource flavors.
 
@@ -68,7 +74,7 @@ In RHOAI, Red Hat supports only a single cluster queue per cluster (that is, hom
 >
 > `resourceflavor.kueue.x-k8s.io/default-flavor created`
 
-## 9.2 Create a cluster queue to manage the empty Kueue resource flavor
+## 9.2 Create a cluster queue to manage the Kueue resource flavor
 
 The Kueue ClusterQueue object manages a pool of cluster resources such as pods, CPUs, memory, and accelerators. A cluster can have multiple cluster queues, and each cluster queue can reference multiple resource flavors.
 
@@ -76,10 +82,9 @@ What is this cluster-queue doing? The example configures a cluster queue to assi
 
 - The sum of the CPU requests is less than or equal to 9.
 - The sum of the memory requests is less than or equal to 36Gi.
-- The total number of pods is less than or equal to 5.
 
 > [!TIP]
-> Replace the example quota values (9 CPUs, 36 GiB memory, and 5 NVIDIA GPUs) with the appropriate values for your cluster queue in a real world scenario. The cluster queue will start a distributed workload only if the total required resources are within these quota limits, otherwise the cluster queue does not admit the distributed workload.. Only homogenous NVIDIA GPUs are supported.
+> Replace the example quota values (9 CPUs, 36 GiB memory, and 5 NVIDIA GPUs) with the appropriate values for your cluster queue in a real world scenario. The cluster queue will start a distributed workload only if the total required resources are within these quota limits, otherwise the cluster queue does not admit the distributed workload. Only homogenous NVIDIA GPUs are supported.
 
 ## Steps
 
@@ -95,7 +100,7 @@ What is this cluster-queue doing? The example configures a cluster queue to assi
 
 A LocalQueue is a namespaced object that groups closely related Workloads that belong to a single namespace. Users submit jobs to a LocalQueue, instead of to a ClusterQueue directly. A cluster administrator can optionally define one local queue in a project as the default local queue for that project.
 
-In this example, the kueue.x-k8s.io/default-queue: "true" annotation defines this local queue as the default local queue for the `sandbox` project. If a user submits a distributed workload in the `sandbox` project and that distributed workload does not specify a local queue in the cluster configuration, Kueue automatically routes the distributed workload to the `local-queue-test` local queue. The distributed workload can then access the resources that the cluster-queue cluster queue manages.
+In this example, the `kueue.x-k8s.io/default-queue: "true"` annotation defines this local queue as the default local queue for the `sandbox` project. If a user submits a distributed workload in the `sandbox` project and that distributed workload does not specify a local queue in the cluster configuration, Kueue automatically routes the distributed workload to the `local-queue-test` local queue. The distributed workload can then access the resources that the `cluster-queue` cluster queue manages.
 
 ## Steps
 

@@ -13,7 +13,7 @@
 
 Red Hat OpenShift AI is a platform for data scientists and developers of artificial intelligence and machine learning applications.
 
-OpenShift AI provides an environment to develop, train, serve, test, and monitor AI/ML models and applications on-premise or in the cloud. [More Info](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/2.13/html/introduction_to_red_hat_openshift_ai/index)
+OpenShift AI provides an environment to develop, train, serve, test, and monitor AI/ML models and applications on-premise or in the cloud. [More Info](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.2/html/introduction_to_red_hat_openshift_ai/index)
 
 - Learn more about features and dependencies [(link)](/docs/info-features.md)
 
@@ -25,7 +25,7 @@ OpenShift AI provides an environment to develop, train, serve, test, and monitor
 1. [(Optional) Run sample GPU application](/docs/03-run-sample-gpu-application.md)
 1. [Configure GPU dashboards](/docs/04-configure-gpu-dashboards.md)
 1. [Configure GPU sharing method](/docs/05-configure-gpu-sharing-method.md)
-1. [Install RHOAI Kserve dependencies](/docs/06-install-kserve-dependencies.md)
+1. [Install RHOAI Dependencies](/docs/06-install-rhoai-dependencies.md)
 1. [Install RHOAI Operator and Components](/docs/07-install-rhoai-operator.md)
 1. [Configure RHOAI / Data Science Pipelines](/docs/08-configure-rhoai.md)
 1. [Configure distributed workloads](/docs/09-configure-distributed-workloads.md)

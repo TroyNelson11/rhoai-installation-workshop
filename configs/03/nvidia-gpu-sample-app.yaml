@@ -5,6 +5,10 @@ metadata:
   namespace: sandbox
 spec:
   restartPolicy: OnFailure
+  securityContext:
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
   containers:
   - name: cuda-vectoradd
     image: "nvidia/samples:vectoradd-cuda11.2.1"

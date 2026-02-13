@@ -20,7 +20,7 @@
 
 - Installing OpenShift AI is not the last step in preparing for data science users
 
-## 8.1 Ensure you have an Accelerator Profile
+## 8.1 Verify GPU resources are available
 
 ### Objectives
 
@@ -28,25 +28,33 @@
 
 ### Rationale
 
-- RHOAI may or may not automatically detect your GPUs. The order you configure these components in matters.
+- The GPU Operator and NFD must be properly installed for GPU resources to be advertised to the scheduler. Verifying this before onboarding data scientists avoids scheduling failures.
 
 ### Takeaways
 
-- How RHOAI detects GPUs
-- How GPUs are configured for easy consumption in the RHOAI web UI
-- [More Info](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/2.13/html/working_with_accelerators/overview-of-accelerators_accelerators)
+- GPU availability is determined by the NVIDIA GPU Operator's device plugin advertising `nvidia.com/gpu` resources on nodes
+- The RHOAI dashboard will automatically detect available GPUs when workbenches or serving runtimes request them
 
 ## Steps
 
-- [ ] Ensure that you have an Accelerator Profile for your Nvidia GPU
+- [ ] Verify that GPU nodes have `nvidia.com/gpu` resources available
 
-      oc get acceleratorprofile -n redhat-ods-applications migrated-gpu -ojsonpath='{range .spec.tolerations[*]}{.key}{"\n"}{end}'
+      oc get nodes -l nvidia.com/gpu.machine -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.allocatable.nvidia\.com/gpu}{"\n"}{end}'
 
 > Expected output
 >
-> `nvidia.com/gpu`
+> `ip-10-x-xx-xxx.us-xxxx-x.compute.internal	8`\
 
-- [ ] Verify the `taints` key set in your Node / MachineSets match the tolerations key set in your `Accelerator Profile`.
+- [ ] Verify GPU node labels are present
+
+      oc get nodes -l nvidia.com/gpu.machine -o jsonpath='{range .items[*]}{.metadata.labels.nvidia\.com/gpu\.product}{"\n"}{end}'
+
+> Expected output
+>
+> `NVIDIA-L40S-SHARED`\
+
+
+- [ ] If taints were configured in step 5, verify they are present on GPU nodes
 
       oc get node -l nvidia.com/gpu.machine -ojsonpath='{range .items[0].spec.taints[*]}{.key}{"\n"}{end}'
 
@@ -55,7 +63,53 @@
 > `nvidia.com/gpu`
 
 > [!NOTE]
-> If the taint keys do not match, you can either edit the AcceleratorProfile or, if no AcceleratorProfile was present at all you can trigger regeneration by the RHOAI Console. See the steps [here](/docs/info-regenerate-accelerator-profiles.md) for the procedure to do this.
+> If taints are present on GPU nodes, ensure that any workloads targeting GPUs include matching tolerations. Tolerations are configured directly in workbench or serving runtime pod specifications.
+
+- [ ] Create a Hardware Profile for NVIDIA GPUs
+
+> [!IMPORTANT]
+> RHOAI 3.x requires [Hardware Profiles](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.2/html/working_with_accelerators/working-with-hardware-profiles_accelerators) to assign accelerator resources to workloads. Hardware profiles are custom resources that define hardware configurations including resource identifiers, limits, tolerations, and node selectors. Without a hardware profile, the RHOAI dashboard cannot assign GPU resources to workbenches or model serving deployments.
+
+1. From the RHOAI dashboard, click **Settings** -> **Environment setup** -> **Hardware profiles**
+1. Click **Create hardware profile**
+1. In the **Name** field, enter `NVIDIA GPU`
+1. Add the following resource by clicking **Add resource**:
+
+   **GPU**
+   - **Resource label**: `GPU`
+   - **Resource identifier**: `nvidia.com/gpu`
+   - **Resource type**: 'Accelerator'
+   - **Default**: `1`
+   - **Minimum allowed**: `1`
+   - **Maximum allowed**: `1` (adjust based on your cluster's GPU count per node)
+   - Click **Add**
+
+1. Edit the following resources by clicking the **Pencil Icon** on each:
+
+   **CPU**
+   - **Default**: `4`
+   - **Minimum allowed**: `2`
+   - **Maximum allowed**: `8`
+   - Click **Update**
+
+   **Memory**
+   - **Default**: `24Gi`
+   - **Minimum allowed**: `8Gi`
+   - **Maximum allowed**: `48Gi`
+   - Click **Update**
+
+> [!NOTE]
+> The CPU and memory values above are recommendations for a `g6e.4xlarge` instance (16 vCPUs, 64 GB RAM). Adjust the defaults, minimums, and maximums based on your node size and workload requirements. Leave headroom for the operating system, kubelet, and other cluster services.
+1. Scroll down to **node selectors and tolerations**, the Workload allocation strategy
+1. Click **⊕ Add toleration**
+   - **Operator**: `Exists`
+   - **Effect**: `NoSchedule`
+   - **Key**: `nvidia.com/gpu`
+   - Click **Add**
+1. Click **Create hardware profile**
+
+> [!NOTE]
+> The hardware profile should now appear under **Settings** -> **Hardware profiles** in the RHOAI dashboard, and be selectable when creating workbenches or deploying models.
 
 ## 8.2 Increasing your non-GPU compute capacity
 
@@ -81,7 +135,7 @@
 > Expected output
 >
 > `NAME                                        DESIRED   CURRENT   READY   AVAILABLE   AGE`\
-> `cluster-xxxxx-xxxxx-gpu-worker-us-east-2a   2         2         2       2           3h52m`\
+> `cluster-xxxxx-xxxxx-gpu-worker-us-east-2a   1         1         1       1           3h52m`\
 > `cluster-xxxxx-xxxxx-worker-us-east-2a       0         0                             5h24m`
 
 - [ ] Either copy the name of the non-GPU MachineSet you want to scale, or run the following command if you have the tooling available
@@ -108,35 +162,18 @@
 
 ### Takeaways
 
+- KServe is the primary model serving platform
 - OpenShift AI has out-of-the-box serving runtimes that are fully supported by Red Hat, but the model serving frameworks are useful well beyond those supported runtimes
 - Serving runtimes may contain optimizations for hardware or model frameworks that are useful to leverage, even if they're not explicitly supported by Red Hat
 - GitOps-based processes can define approved serving runtimes for data scientist or MLOps users to self-service
 
 ## Steps
 
-**Option 1 (manual)**:
-
-- From RHOAI, Settings > Serving runtimes > Click Add Serving Runtime.
-- Select `Multi-model serving`
-- Select `Start from scratch`
-- Review, Copy and Paste in the content from `configs/08/other/rhoai-add-serving-runtime.yaml`
-- Add and confirm the runtime can be selected in a Data Science Project
-
-**Option 2**:
-
-    oc apply -f configs/08/rhoai-add-serving-runtime-template.yaml -n redhat-ods-applications
-
-> Expected output
->
-> `template.template.openshift.io/triton created`
-
-## Validation
-
-- Open the OpenShift AI dashboard
-- Navigate to a Data Science Project (such as `sandbox`)
-- Navigate to the `Models` tab of the project
-- Deploy a model server using the `Multi-model serving platform` by clicking the `Add model server` button
-- Grab the pulldown for `Serving runtime` and confirm that `Nvidia Triton Model Server` is visible from the options
+- From RHOAI, Settings > Model resources and operations > Serving runtimes > Click **Add serving runtime**.
+- Select the API protocol `REST`
+- Select both model types `Predicitive Model & Generatative AI model` (you can change this in the future)
+- Copy and Paste in the content from `configs/08/rhoai-add-serving-runtime.yaml`
+- Click **Create**
 
 ## 8.4 Configuring Data Science Pipelines
 
@@ -164,7 +201,10 @@
 
 > Expected output
 >
-> `Now using project "database" on server "https://api.cluster-5mgxv.5mgxv.sandbox3005.opentlc.com:6443".`
+> `...`
+> `...`
+> `Now using project "database" on server "https://api.cluster-xxxxx.xxxxx.sandbox3005.opentlc.com:6443".`
+> `...`
 
 - [ ] Create the database instance
 
@@ -288,6 +328,8 @@
 > `to build a new example application in Ruby. Or use kubectl to deploy a simple Kubernetes application:`
 >
 > `    kubectl create deployment hello-node --image=registry.k8s.io/e2e-test-images/agnhost:2.43 -- /agnhost serve-hostname`
+>
+> `namespace/pipeline-test labeled`
 
 - [ ] Create required secrets for pipeline server
 
@@ -315,9 +357,9 @@
 
 ## Validation
 
-Navigate to RHOAI dashboard -> Data Science Pipelines -> Project `pipeline-test`
+Navigate to RHOAI dashboard -> Develop & Train -> Pipelines -> Project `pipeline-test`
 
-You should see the `iris-training` pipeline and be able to execute a pipeline run. Use the three dots menu on the right side of the pipeline to instantiate the run.
+You should see the `iris-training` pipeline and be able to execute a pipeline run. Use the three dots menu on the right side of the pipeline to instantiate the run. You could also navigate through the `pipeline-test` project directly.
 
 ## Validation
 

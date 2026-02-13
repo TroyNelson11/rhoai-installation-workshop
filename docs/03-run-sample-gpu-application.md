@@ -104,6 +104,11 @@
 1. The first table reflects the information about all available GPUs (the example shows one GPU).
 1. The second table provides details on the processes using the GPUs.
 
+- [ ] Feel free to delete the pod once you've successfully viewed the GPU resource.
+
+```sh
+oc delete pod cuda-vectoradd -n sandbox
+```
 ## Validation
 
 ![](/assets/03-validation.gif)

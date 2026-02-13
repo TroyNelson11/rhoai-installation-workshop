@@ -8,15 +8,15 @@
 
 > Intended commands to be executed from the root directory of this repository. The majority of the configurations to be applied are already created, with the exception of the ones that prompts you for specifics that are either created in the command or dumped to a `scratch` dir that is ignored in the `.gitignore`.
 
-- [ ] Have `cluster-admin` access to an OpenShift 4.14+ cluster
-  - [Create an OpenShift 4.16+ cluster](/docs/info-create-openshift-cluster.md)
+- [ ] Have `cluster-admin` access to an OpenShift 4.19+ cluster
+  - [Create an OpenShift 4.19+ cluster](/docs/info-create-openshift-cluster.md)
 - [ ] Open a `bash` terminal on your local machine
 - [ ] Git clone this repository
 
 ```sh
-git clone https://github.com/redhat-na-ssa/hobbyist-guide-to-rhoai.git
+git clone https://github.com/redhat-ai-americas/rhoai-installation-workshop.git
 
-cd hobbyist-guide-to-rhoai
+cd rhoai-installation-workshop
 ```
 
 - [ ] Create scratch directory
@@ -39,7 +39,11 @@ oc login <openshift_cluster_url> -u <admin_username> -p <password>
 - [ ] Run prerequisites (from this repository's root directory)
 
 ```sh
-./scripts/setup.sh -s 0
+oc apply -f ./configs/00
+```
+- [ ] If the web-terminal-tooling resource mapping throws an error. Run the apply command again with just the tooling yaml.
+```sh
+oc apply -f ./configs/00/web-terminal-tooling.yaml
 ```
 
 > [!NOTE]
